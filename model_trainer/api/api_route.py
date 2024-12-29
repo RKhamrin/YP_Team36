@@ -102,8 +102,10 @@ class ApiResponse(BaseModel):
 # API endpoints
 @router.get("/show_example")
 async def show_example() -> StreamingResponse:
-    """Функция демонстрации 
+    """Функция получения примера (сэмпла) данных
     
+    returns:
+        data: csv
     """
     data = pd.read_csv('data/data_sample.csv')
     data.columns = list(map(lambda x: x.replace('.', ''), data.columns))
@@ -119,8 +121,13 @@ async def show_example() -> StreamingResponse:
 
 @router.post("/fit", response_model=FitResponse, status_code=HTTPStatus.CREATED)
 async def fit(jsonfile: str, data: UploadFile):
-    """json: {'model_id': str, 'hyperparameters': {}}
+    """Функция обучения модели 
+    params:
+        jsonfile: {'model_id': str, 'hyperparameters': Dict}
+        data: csv
 
+    returns:
+        {"message": "Model model_id is trained and saved"}
     """
     data = pd.read_csv(data.file, index_col=0).reset_index().drop(columns=['index'])
     data.sort_values(by = 'date', ignore_index = 'True', inplace = True)
@@ -161,8 +168,13 @@ async def fit(jsonfile: str, data: UploadFile):
 
 @router.post("/predict")
 async def predict(jsonfile: str, data: UploadFile) -> StreamingResponse:
-    """json: {'model_id': str}
+    """Функция получения предсказаний загруженной модели
+    params: 
+        jsonfile: {'model_id': str}
+        data: csv
 
+    returns:
+        data: csv (со столбцом preds -- предсказания)
     """
     data = pd.read_csv(data.file, index_col=0).reset_index().drop(columns=['index'])
     data.sort_values(by = 'date', ignore_index = 'True', inplace = True)
@@ -187,8 +199,10 @@ async def predict(jsonfile: str, data: UploadFile) -> StreamingResponse:
 
 @router.get("/show_models", response_model=ShowModelsResponse)
 async def show_models():
-    """
-    
+    """Функция получения списка моделей
+
+    returns:
+        models_info: Dict
     """
 
     models_info = {}
@@ -199,7 +213,12 @@ async def show_models():
 
 @router.post("/set_model", response_model=SetModelResponse)
 async def set_model(request: SetModelRequest):
-    """
+    """Функция загрузки модели 
+    params:
+        model_id: str
+
+    returns:
+        {"message": "Model model_id is loaded"}
 
     """
 
