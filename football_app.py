@@ -18,7 +18,9 @@ from io import StringIO, BytesIO
 #    level=logging.INFO,
 #    format='%(asctime)s - %(levelname)s - %(message)s'
 #)
-API_URL = "http://0.0.0.0:8000/api/models"
+import os
+
+API_URL = os.getenv("API_URL", "http://localhost:8000/api/models")
 #template_data = pd.read_csv("teams_matches_stats-2.csv").head(1)
 
 def validate(uploaded_df, main_df):

@@ -17,3 +17,29 @@
 2024-12-30 15:32:48,379 - INFO - Получен запрос: POST http://localhost:8000/api/models/fit?jsonfile=%7B%20%20%20%22model_id%22%3A%20%22example_model_123%22%2C%20%20%20%22hyperparameters%22%3A%20%7B%22C%22%3A%200.5%2C%20%20%20%20%7D%20%7D
 2024-12-30 15:33:14,350 - INFO - Получен запрос: POST http://localhost:8000/api/models/fit?jsonfile=%7B%20%20%20%22model_id%22%3A%20%22example_model_123%22%2C%20%20%20%22hyperparameters%22%3A%20%7B%22C%22%3A%200.5%7D%20%7D
 2024-12-30 15:33:14,569 - INFO - Ответ: 201
+2024-12-30 15:42:19,555 - INFO - Получен запрос: GET http://localhost:8000/api/openapi
+2024-12-30 15:42:19,557 - INFO - Ответ: 200
+2024-12-30 15:42:19,755 - INFO - Получен запрос: GET http://localhost:8000/api/openapi.json
+2024-12-30 15:42:19,776 - INFO - Ответ: 200
+2024-12-30 15:42:25,762 - INFO - Получен запрос: GET http://localhost:8000/api/models/show_example
+2024-12-30 15:42:25,797 - INFO - Ответ: 200
+2024-12-30 15:42:29,149 - INFO - Получен запрос: GET http://localhost:8000/api/models/show_example
+2024-12-30 15:42:29,162 - INFO - Ответ: 200
+2024-12-30 15:47:16,206 - INFO - Получен запрос: GET http://localhost:8000/api/openapi
+2024-12-30 15:47:16,209 - INFO - Ответ: 200
+2024-12-30 15:47:16,323 - INFO - Получен запрос: GET http://localhost:8000/api/openapi.json
+2024-12-30 15:47:16,336 - INFO - Ответ: 200
+2024-12-30 15:48:10,510 - INFO - Получен запрос: GET http://localhost:8000/api/models/show_example
+2024-12-30 15:48:10,526 - INFO - Ответ: 200
+2024-12-30 15:48:12,439 - INFO - Получен запрос: GET http://localhost:8000/api/models/show_example
+2024-12-30 15:48:12,449 - INFO - Ответ: 200
+2024-12-30 15:48:52,013 - INFO - Получен запрос: GET http://localhost:8000/api/models/show_example
+2024-12-30 15:48:52,029 - INFO - Ответ: 200
+2024-12-30 15:52:05,169 - INFO - Получен запрос: GET http://localhost:8000/api/openapi
+2024-12-30 15:52:05,171 - INFO - Ответ: 200
+2024-12-30 15:52:05,330 - INFO - Получен запрос: GET http://localhost:8000/api/openapi.json
+2024-12-30 15:52:05,343 - INFO - Ответ: 200
+2024-12-30 15:52:08,674 - INFO - Получен запрос: GET http://localhost:8000/api/models/show_example
+2024-12-30 15:52:08,690 - INFO - Ответ: 200
+2024-12-30 15:52:09,887 - INFO - Получен запрос: GET http://localhost:8000/api/models/show_example
+2024-12-30 15:52:09,899 - INFO - Ответ: 200

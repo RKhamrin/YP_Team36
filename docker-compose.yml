@@ -12,6 +12,8 @@ services:
       - .:/app
     depends_on:
       - backend
+    environment:
+      - API_URL=http://football_backend:8000/api/models  # Устанавливаем URL для подключения к бекенду
 
   backend:
     build:
@@ -24,3 +26,9 @@ services:
       - ./model_trainer:/app
     environment:
       - PYTHONUNBUFFERED=1
+
+networks:
+  default:
+    name: football_network
+    driver: bridge
+
