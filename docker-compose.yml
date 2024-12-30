@@ -1,0 +1,26 @@
+version: '3.10'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: football_frontend
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./model_trainer
+      dockerfile: Dockerfile
+    container_name: football_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./model_trainer:/app
+    environment:
+      - PYTHONUNBUFFERED=1
