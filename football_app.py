@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import logging
 import os
 from sklearn.model_selection import train_test_split
-from io import StringIO
+from io import StringIO, BytesIO
 
 #if not os.path.exists('logs'):
 #    os.makedirs('logs')
@@ -93,16 +93,22 @@ def new_model(data):
     raw_params = st.text_input('Задайте гиперпараметры для модели через запятую в формате: [имя гиперпараметра]'
                                     '=[значение в нужном формате], например: alpha = 0.1')
     hyperparameters = params_processing(raw_params)
-    st.write(hyperparameters)
-    if id is not None:
+    if id is not "":
         st.subheader('Обучение модели')
         json_params = {'model_id':id,'hyperparameters': hyperparameters}
-        st.write(json_params)
-        #csv_data = data.to_csv(index=False)
-        #files = {'data': ('data.csv', csv_data, 'text/csv')}
-        #headers = {'Content-Type': 'application/json'}
-        params = {'data':data, 'jsonfile':json_params}
-        response = requests.post(f"{API_URL}/fit", params)
+
+        # Создание объекта BytesIO для CSV
+        csv_data = BytesIO()
+        data.to_csv(csv_data, index=False)
+        csv_data.seek(0)  # Сбросить указатель в начало буфера
+
+        # Подготовка данных к отправке
+        files = {'data': ('data.csv', csv_data, 'text/csv')}
+
+        #data_payload = {'jsonfile': json_params}
+
+        params = {'data':files}
+        response = requests.post(f"{API_URL}/fit?jsonfile={json_params}", files = files)
 
         #response = requests.post(f"{API_URL}/fit", data = data.to_csv(), json = json_params)
         st.write(response.text)
@@ -114,10 +120,10 @@ def main():
     uploaded_file = st.file_uploader("Выберите CSV-файл", type=["csv"])
     template = fetch_example()
     if uploaded_file is not None:
-        uploaded_data = pd.read_csv(uploaded_file, sep = ",", index_col = 0)
+        uploaded_data = pd.read_csv(uploaded_file, sep = ",")
         validate(uploaded_data, template)
         perform_eda(uploaded_data)
-        new_model(uploaded_file)
+        new_model(uploaded_data)
 
 if __name__ == "__main__":
     main()
