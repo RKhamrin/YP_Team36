@@ -14,7 +14,7 @@ def getStats(team, date, df):
     if 'result' in df.columns:
         df_filter = df[(df['team'] == team) & (df['date'] < date)]
         if 0 < len(df_filter) < 10:
-            df_filter = df_filter.drop(['team', 'date', 'opponent', 'venue', 'result'], axis=1).sum()/len(df_filter)
+            stats = df_filter.drop(['team', 'date', 'opponent', 'venue', 'result'], axis=1).sum()/len(df_filter)
         elif len(df_filter) >= 10:
             stats = df_filter.drop(['team', 'date', 'opponent', 'venue', 'result'], axis=1)[-10:].sum()/10
         else:
