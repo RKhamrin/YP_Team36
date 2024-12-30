@@ -3,8 +3,9 @@ import pickle
 import json
 
 import io
+from io import StringIO
 from http import HTTPStatus
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import StreamingResponse
 
 from pydantic import BaseModel
@@ -127,7 +128,7 @@ async def show_example() -> StreamingResponse:
 
 
 @router.post("/fit", response_model=FitResponse, status_code=HTTPStatus.CREATED)
-async def fit(jsonfile: str, data: UploadFile) -> StreamingResponse:
+async def fit(jsonfile: str, data: UploadFile = File(...)):
     """Функция обучения модели
     params:
         jsonfile: {'model_id': str, 'hyperparameters': Dict}
@@ -136,11 +137,12 @@ async def fit(jsonfile: str, data: UploadFile) -> StreamingResponse:
     returns:
         {"message": "Model model_id is trained and saved"}
     """
-    data = pd.read_csv(data.file, index_col=0).reset_index().drop(columns=['index'])
+    content = StringIO(data.file.read().decode("utf-8"))
+    data = pd.read_csv(content, index_col=0).reset_index().drop(columns=['index'])
     data.sort_values(by='date', ignore_index='True', inplace=True)
+    
     config = json.loads(jsonfile)
     model_id, hyperparameters = config['model_id'], config['hyperparameters']
-
     feat_data = GetTrain(data)
     x = pd.DataFrame(feat_data, columns=data.drop(['team', 'date', 'opponent', 'venue', 'result'], axis=1).columns)
     x = pd.concat([x, data['venue']], axis=1)
@@ -171,7 +173,7 @@ async def fit(jsonfile: str, data: UploadFile) -> StreamingResponse:
 
 
 @router.post("/predict")
-async def predict(jsonfile: str, data: UploadFile) -> StreamingResponse:
+async def predict(jsonfile: str, data: UploadFile = File(...)) -> StreamingResponse:
     """Функция получения предсказаний загруженной модели
     params:
         jsonfile: {'model_id': str}
@@ -225,7 +227,6 @@ async def set_model(request: SetModelRequest):
         {"message": "Model id is loaded"}
 
     """
-
     model_id = request.model_dump()['id']
     models_load[model_id] = models[model_id]
 
