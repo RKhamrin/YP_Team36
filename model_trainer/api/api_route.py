@@ -28,7 +28,7 @@ with open("data/baseline_ohe.pkl", 'rb') as baseline_ohe:
     baseline_ohe = pickle.load(baseline_ohe)
 with open("data/baseline_scaler.pkl", 'rb') as baseline_scaler:
     baseline_scaler = pickle.load(baseline_scaler)
-models['baseline_model'] = [baseline_model, baseline_ohe, baseline_scaler, {}]
+models['baseline_model'] = {}
 
 
 class Item(BaseModel):
@@ -219,10 +219,10 @@ async def show_models():
 async def set_model(request: SetModelRequest):
     """Функция загрузки модели
     params:
-        model_id: str
+        id: str
 
     returns:
-        {"message": "Model model_id is loaded"}
+        {"message": "Model id is loaded"}
 
     """
 
