@@ -182,9 +182,12 @@ async def predict(jsonfile: str, data: UploadFile = File(...)) -> StreamingRespo
     returns:
         data: csv (со столбцом preds -- предсказания)
     """
-    data = pd.read_csv(data.file, index_col=0).reset_index().drop(columns=['index'])
+    content = StringIO(data.file.read().decode("utf-8"))
+    data = pd.read_csv(content, index_col=0).reset_index().drop(columns=['index'])
     data.sort_values(by='date', ignore_index='True', inplace=True)
-    model_id = json.loads(jsonfile)['model_id']
+    
+    config = json.loads(jsonfile)
+    model_id = config['model_id']
     with open(f"data/{model_id}_model.pkl", 'rb') as model_file:
         model = pickle.load(model_file)
     with open(f"data/{model_id}_ohe.pkl", 'rb') as ohe_file:
