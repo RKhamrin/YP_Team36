@@ -1,71 +1,71 @@
-import streamlit
+import json
+from io import StringIO
 import streamlit as st
 import requests
 import pandas as pd
-import json
-import uvicorn
-import matplotlib.pyplot as plt
-import logging
-import os
-from sklearn.model_selection import train_test_split
-from io import StringIO, BytesIO
 
-#if not os.path.exists('logs'):
-#    os.makedirs('logs')
 
-#logging.basicConfig(
-#    filename='logs/app.log',
-#    level=logging.INFO,
-#    format='%(asctime)s - %(levelname)s - %(message)s'
-#)
-import os
+API_URL = "http://0.0.0.0:8000/api/models"
 
-API_URL = os.getenv("API_URL", "http://localhost:8000/api/models")
-#template_data = pd.read_csv("teams_matches_stats-2.csv").head(1)
 
 def validate(uploaded_df, main_df):
+    """
+        Функция для валидации формата инпут файла
+            uploaded_df: pd.DataFrame - загруженный пользователем
+            main_df:pd.DataFrame - темплейт с сервера
+    """
+
     if uploaded_df.shape[1] != main_df.shape[1]:
         st.error("Количество колонок не соответствует необходимому")
         return False
-    if not all(uploaded_df.columns == main_df.columns):
+    if (uploaded_df.columns != main_df.columns).any():
         st.error("Названия колонок не соответствуют шаблону.")
         return False
-    #for col in main_df.columns:
-    #    if uploaded_df[col].dtype != main_df[col].dtype:
-    #        st.error(f"Тип данных для колонки '{col}' не соответствует шаблону.")
-    #        return False
     st.success("Загруженный датасет соответствует шаблону!")
     return True
 
+
 def fetch_example():
-    response = requests.get(f"{API_URL}/show_example")
+    """
+        Функция для получения теплейта с сервера
+        не требует вводных данных
+        """
+    response = requests.get(f"{API_URL}/show_example", timeout = 60)
     if response.status_code == 200:
         data = StringIO(response.text)
-        df = pd.DataFrame(data)[0].str.split(',',expand = True)
+        df = pd.DataFrame(data)[0].str.split(',', expand=True)
         df.columns = df.iloc[0]
         df = df[1:]
         df.columns = df.columns.str.strip()
         return df
-    else:
+    if response.status_code != 200:
         st.error(f"Ошибка при запросе API: {response.status_code}")
-        return None
+    return None
+
 
 def perform_eda(data):
+    """
+    Функция для EDA
+        params:
+            data: pd.DataFrame - загруженный пользователем
+    """
     st.header("Анализ данных")
     if st.checkbox("Показать отчет по данным"):
-    # Статистика
+        # Статистика
         st.write('Описание вещественных показателей')
         st.write(data.describe())
         st.write('Описание категориальных показателей')
-        st.write(data.describe(include = 'object'))
+        st.write(data.describe(include='object'))
         st.write('Плотность данных (Density)')
         st.write(1 - (data.isna().sum()/len(data)).mean())
-    # Визуализация
-        #st.subheader("Гистограмма")
-        #data.hist(bins=30)
-        #plt.show()
-        #st.pyplot()
+
+
 def params_processing(text_input):
+    """
+        Функция для получения словаря параметров из текста
+            params:
+                text_input: str
+    """
     params = text_input.split(',')
     hyperparameters = {}
 
@@ -90,45 +90,121 @@ def params_processing(text_input):
 
 
 def new_model(data):
+    """
+        Функция для FIT ручки
+            params:
+                data: UploadedFile из streamlit
+    """
     st.header("Создание модели")
-    id = st.text_input('Задайте id для модели:')
-    raw_params = st.text_input('Задайте гиперпараметры для модели через запятую в формате: [имя гиперпараметра]'
-                                    '=[значение в нужном формате], например: alpha = 0.1')
+    id_fit = st.text_input('Задайте id для модели:')
+    raw_params = st.text_input('Задайте гиперпараметры для модели через '
+                               'запятую в формате: '
+                               '[имя гиперпараметра] ='
+                               '[значение в нужном формате], '
+                               'например: alpha = 0.1:')
     hyperparameters = params_processing(raw_params)
-    if id is not "":
-        st.subheader('Обучение модели')
-        json_params = {'model_id':id,'hyperparameters': hyperparameters}
+    if id_fit != "":
+        st.subheader('Статус обучения')
+        json_params = {'model_id': id_fit, 'hyperparameters': hyperparameters}
+        st.write(f"Полученные на вход параметры: {json_params}")
+        files = {
+            'data': ('data_sample.csv', data, 'multipart/form-data')
+        }
 
-        # Создание объекта BytesIO для CSV
-        csv_data = BytesIO()
-        data.to_csv(csv_data, index=False)
-        csv_data.seek(0)  # Сбросить указатель в начало буфера
+        response = requests.post(f"{API_URL}/fit?jsonfile="
+                                 f"{json.dumps(json_params)}",
+                                 files=files,
+                                 timeout=600)
+        if response.status_code == 201:
+            st.write('Модель успешно создана и обучена')
+        else:
+            st.write(response.text)
 
-        # Подготовка данных к отправке
-        files = {'data': ('data.csv', csv_data, 'text/csv')}
 
-        #data_payload = {'jsonfile': json_params}
+def load_model():
+    """
+         Функция для загрузки модели перед обучением
+         на входе никакие даннве не передаются
+    """
+    st.header('Загрузка модели для получения прогнозов')
+    id_load = st.text_input('Укажите id модели, которую необходимо'
+                            ' загрузить и использовать:')
+    if id_load != "":
+        ids = {'id': id_load}
+        response = requests.post(f"{API_URL}/set_model", json=ids,
+                                 timeout=600)
+        st.write(response.json())
+    return id_load
 
-        params = {'data':files}
-        response = requests.post(f"{API_URL}/fit?jsonfile={json_params}", files = files)
 
-        #response = requests.post(f"{API_URL}/fit", data = data.to_csv(), json = json_params)
-        st.write(response.text)
+def predict(id_pred):
+    """
+        Функция для PREDICT
+            params:
+                id_pred: str - получен после load_models
+    """
+    st.header("Предсказание по полученной модели")
+    if st.checkbox("Получить предсказание"):
+        json_params_pred = {"model_id": str(id_pred)}
+        uploaded_pred = st.file_uploader("Загрузите данные в формате "
+                                         "CSV-файла, для которых нужно "
+                                         "получить предсказание:",
+                                         type=["csv"], key=4)
+        if uploaded_pred is not None:
+            files_pred = {
+                'data': ('data_sample.csv', uploaded_pred,
+                         'multipart/form-data')
+            }
+            response = requests.post(f"{API_URL}/predict?jsonfile="
+                                     f"{json.dumps(json_params_pred)}",
+                                     files=files_pred,
+                                     timeout=600)
+            content = StringIO(response.content.decode("utf-8"))
+            data = pd.read_csv(content).reset_index().drop(columns=['index'])
+            if response.status_code == 200:
+                st.write('Прогноз получен. '
+                         'В переменной preds лежат предсказания: '
+                         '1 - победа домашней команды, '
+                         '0 - проигрыш или ничья')
+                st.write(data.head())
+            else:
+                st.write(response.text)
+
+
+# 5. Просмотр информации о модели и полученных кривых обучения
+def model_review():
+    """
+            Функция для просмотра итоговых моделей
+            без дополнительных входных данных
+    """
+    st.header("Информация о модели")
+    if st.button("Показать информацию о модели"):
+        response = requests.get(f"{API_URL}/show_models", timeout=600)
+        if response.status_code == 200:
+            st.write(response.json())
+        else:
+            st.write(response.json())
+            st.error("Ошибка при получении информации о модели.")
 
 
 def main():
+    """
+            Функция запуска всех частей приложения
+    """
     st.title("Аналитика и прогнозирование исхода футбольных матчей")
     st.header("Загрузка данных")
     uploaded_file = st.file_uploader("Выберите CSV-файл", type=["csv"])
     template = fetch_example()
     if uploaded_file is not None:
-        uploaded_data = pd.read_csv(uploaded_file, sep = ",")
+        uploaded_data = pd.read_csv(uploaded_file, sep=",")
+        uploaded_file.seek(0)
         validate(uploaded_data, template)
         perform_eda(uploaded_data)
-        new_model(uploaded_data)
+        new_model(uploaded_file)
+        id_loaded = load_model()
+        predict(id_loaded)
+        model_review()
+
 
 if __name__ == "__main__":
     main()
-
-#uvicorn.run("model_trainer.main:app", host="0.0.0.0", port=8000, reload=True)
-#streamlit run football_app.py
