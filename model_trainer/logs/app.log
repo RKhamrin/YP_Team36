@@ -43,3 +43,39 @@
 2024-12-30 15:52:08,690 - INFO - Ответ: 200
 2024-12-30 15:52:09,887 - INFO - Получен запрос: GET http://localhost:8000/api/models/show_example
 2024-12-30 15:52:09,899 - INFO - Ответ: 200
+2024-12-31 08:04:20,315 - INFO - Получен запрос: GET http://localhost:8000/api/openapi
+2024-12-31 08:04:20,317 - INFO - Ответ: 200
+2024-12-31 08:04:20,602 - INFO - Получен запрос: GET http://localhost:8000/api/openapi.json
+2024-12-31 08:04:20,617 - INFO - Ответ: 200
+2024-12-31 08:04:31,052 - INFO - Получен запрос: GET http://football_backend:8000/api/models/show_example
+2024-12-31 08:04:31,073 - INFO - Ответ: 200
+2024-12-31 08:04:36,245 - INFO - Получен запрос: GET http://football_backend:8000/api/models/show_example
+2024-12-31 08:04:36,255 - INFO - Ответ: 200
+2024-12-31 08:04:42,216 - INFO - Получен запрос: GET http://football_backend:8000/api/models/show_example
+2024-12-31 08:04:42,230 - INFO - Ответ: 200
+2024-12-31 08:04:42,254 - INFO - Получен запрос: POST http://football_backend:8000/api/models/fit?jsonfile=%7B%22model_id%22:%20%22aaa%22,%20%22hyperparameters%22:%20%7B%7D%7D
+2024-12-31 08:04:42,527 - INFO - Ответ: 201
+2024-12-31 08:04:43,259 - INFO - Получен запрос: GET http://football_backend:8000/api/models/show_example
+2024-12-31 08:04:43,285 - INFO - Ответ: 200
+2024-12-31 08:04:43,314 - INFO - Получен запрос: POST http://football_backend:8000/api/models/fit?jsonfile=%7B%22model_id%22:%20%22aaa%22,%20%22hyperparameters%22:%20%7B%22C%22:%200.5%7D%7D
+2024-12-31 08:04:43,556 - INFO - Ответ: 201
+2024-12-31 08:04:48,133 - INFO - Получен запрос: GET http://football_backend:8000/api/models/show_example
+2024-12-31 08:04:48,143 - INFO - Ответ: 200
+2024-12-31 08:04:48,161 - INFO - Получен запрос: POST http://football_backend:8000/api/models/fit?jsonfile=%7B%22model_id%22:%20%22aaa%22,%20%22hyperparameters%22:%20%7B%22C%22:%200.5%7D%7D
+2024-12-31 08:04:48,379 - INFO - Ответ: 201
+2024-12-31 08:04:48,389 - INFO - Получен запрос: POST http://football_backend:8000/api/models/set_model
+2024-12-31 08:04:48,392 - INFO - Ответ: 200
+2024-12-31 08:04:50,752 - INFO - Получен запрос: GET http://football_backend:8000/api/models/show_example
+2024-12-31 08:04:50,763 - INFO - Ответ: 200
+2024-12-31 08:04:50,783 - INFO - Получен запрос: POST http://football_backend:8000/api/models/fit?jsonfile=%7B%22model_id%22:%20%22aaa%22,%20%22hyperparameters%22:%20%7B%22C%22:%200.5%7D%7D
+2024-12-31 08:04:51,001 - INFO - Ответ: 201
+2024-12-31 08:04:51,011 - INFO - Получен запрос: POST http://football_backend:8000/api/models/set_model
+2024-12-31 08:04:51,013 - INFO - Ответ: 200
+2024-12-31 08:04:55,377 - INFO - Получен запрос: GET http://football_backend:8000/api/models/show_example
+2024-12-31 08:04:55,394 - INFO - Ответ: 200
+2024-12-31 08:04:55,415 - INFO - Получен запрос: POST http://football_backend:8000/api/models/fit?jsonfile=%7B%22model_id%22:%20%22aaa%22,%20%22hyperparameters%22:%20%7B%22C%22:%200.5%7D%7D
+2024-12-31 08:04:55,634 - INFO - Ответ: 201
+2024-12-31 08:04:55,643 - INFO - Получен запрос: POST http://football_backend:8000/api/models/set_model
+2024-12-31 08:04:55,648 - INFO - Ответ: 200
+2024-12-31 08:04:55,658 - INFO - Получен запрос: GET http://football_backend:8000/api/models/show_models
+2024-12-31 08:04:55,660 - INFO - Ответ: 200
