@@ -4,8 +4,9 @@ import streamlit as st
 import requests
 import pandas as pd
 
-import os
-API_URL = os.getenv("API_URL", "http://localhost:8000/api/models")
+
+API_URL = "http://0.0.0.0:8000/api/models"
+
 
 def validate(uploaded_df, main_df):
     """
@@ -132,7 +133,10 @@ def load_model():
         ids = {'id': id_load}
         response = requests.post(f"{API_URL}/set_model", json=ids,
                                  timeout=600)
-        st.write(response.json())
+        if response.status_code == 200:
+            st.write('Модель загружена и готова к использованию')
+        else:
+            st.write(response.text)
     return id_load
 
 
@@ -161,11 +165,11 @@ def predict(id_pred):
             content = StringIO(response.content.decode("utf-8"))
             data = pd.read_csv(content).reset_index().drop(columns=['index'])
             if response.status_code == 200:
-                st.write('Прогноз получен. '
-                         'В переменной preds лежат предсказания: '
+                st.write('Прогноз получен. Ниже приведен пример из первых строк.')
+                st.write('В переменной preds лежат предсказания: '
                          '1 - победа домашней команды, '
                          '0 - проигрыш или ничья')
-                st.write(data.head())
+                st.write(data.head(10))
             else:
                 st.write(response.text)
 
@@ -176,11 +180,11 @@ def model_review():
             Функция для просмотра итоговых моделей
             без дополнительных входных данных
     """
-    st.header("Информация о модели")
-    if st.button("Показать информацию о модели"):
+    st.header("Информация о моделях")
+    if st.button("Показать информацию о моделях"):
         response = requests.get(f"{API_URL}/show_models", timeout=600)
         if response.status_code == 200:
-            st.write(response.json())
+            st.write(response.json()['message'])
         else:
             st.write(response.json())
             st.error("Ошибка при получении информации о модели.")
