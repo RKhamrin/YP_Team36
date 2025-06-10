@@ -17,7 +17,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, BaggingClassifier
 from catboost import CatBoostClassifier
 
-from api.utils import GetTrain, GetPrediction, getStats
+from model_trainer.api.utils import GetTrain, GetPrediction, getStats
 
 
 router = APIRouter(prefix='/api/models')
@@ -25,20 +25,20 @@ router = APIRouter(prefix='/api/models')
 models = {}
 models_load = {}
 
-data = pd.read_csv('model_trainer/data_final_2.csv', index_col=0)
+data = pd.read_csv('data_final_2.csv', index_col=0)
 
-with open("model_trainer/data/baseline_model.pkl", 'rb') as baseline_model:
+with open("data/baseline_model.pkl", 'rb') as baseline_model:
     baseline_model = pickle.load(baseline_model)
-with open("model_trainer/data/baseline_ohe.pkl", 'rb') as baseline_ohe:
+with open("data/baseline_ohe.pkl", 'rb') as baseline_ohe:
     baseline_ohe = pickle.load(baseline_ohe)
-with open("model_trainer/data/baseline_scaler.pkl", 'rb') as baseline_scaler:
+with open("data/baseline_scaler.pkl", 'rb') as baseline_scaler:
     baseline_scaler = pickle.load(baseline_scaler)
 
-with open("model_trainer/data/rf_model.pkl", 'rb') as baseline_model:
+with open("data/rf_model.pkl", 'rb') as baseline_model:
     baseline_model = pickle.load(baseline_model)
-with open("model_trainer/data/rf_ohe.pkl", 'rb') as baseline_ohe:
+with open("data/rf_ohe.pkl", 'rb') as baseline_ohe:
     baseline_ohe = pickle.load(baseline_ohe)
-with open("model_trainer/data/rf_scaler.pkl", 'rb') as baseline_scaler:
+with open("data/rf_scaler.pkl", 'rb') as baseline_scaler:
     baseline_scaler = pickle.load(baseline_scaler)
 
 models['baseline_model'] = {}
@@ -51,7 +51,7 @@ class FitResponse(BaseModel):
 class PredictRequest(BaseModel):
     model_id: str
     home_team: str
-    arrive_team: str
+    opponent_team: str
 
 
 class PredictResponse(BaseModel):
@@ -146,11 +146,11 @@ async def fit(jsonfile: str, extra_data: UploadFile = File(...)):
     model.fit(x, y)
     models[model_id] = hyperparameters
 
-    with open(f"model_trainer/data/{model_id}_model.pkl", 'wb') as model_file:
+    with open(f"data/{model_id}_model.pkl", 'wb') as model_file:
         pickle.dump(model, model_file)
-    with open(f"model_trainer/data/{model_id}_ohe.pkl", 'wb') as ohe_file:
+    with open(f"data/{model_id}_ohe.pkl", 'wb') as ohe_file:
         pickle.dump(enc, ohe_file)
-    with open(f"model_trainer/data/{model_id}_scaler.pkl", 'wb') as scaler_file:
+    with open(f"data/{model_id}_scaler.pkl", 'wb') as scaler_file:
         pickle.dump(scaler, scaler_file)
 
     return {'message': f'model {model_id} is trained and saved'}
@@ -172,11 +172,11 @@ async def predict(request: PredictRequest):
     config = request.model_dump()
     model_id, home_team, opponent_team = config['model_id'], config['home_team'], config['opponent_team']
 
-    with open(f"model_trainer/data/{model_id}_model.pkl", 'rb') as model_file:
+    with open(f"data/{model_id}_model.pkl", 'rb') as model_file:
         model = pickle.load(model_file)
-    with open(f"model_trainer/data/{model_id}_ohe.pkl", 'rb') as ohe_file:
+    with open(f"data/{model_id}_ohe.pkl", 'rb') as ohe_file:
         enc = pickle.load(ohe_file)
-    with open(f"model_trainer/data/{model_id}_scaler.pkl", 'rb') as scaler_file:
+    with open(f"data/{model_id}_scaler.pkl", 'rb') as scaler_file:
         scaler = pickle.load(scaler_file)
 
     # data_local[(data_local['team'] == home_team)&(data_local['opponent'] == opponent_team)]
@@ -194,7 +194,7 @@ async def predict(request: PredictRequest):
     x = pd.concat([x.drop(['venue'], axis=1), one_hot_df], axis=1)
     x = scaler.transform(x)
     preds = model.predict(x)
-    return preds
+    return {"score": str(preds[0])}
 
 
 @router.get("/show_models", response_model=ShowModelsResponse)

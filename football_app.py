@@ -33,10 +33,11 @@ def fetch_example():
     response = requests.get(f"{API_URL}/show_example", timeout = 60)
     if response.status_code == 200:
         data = StringIO(response.text)
-        df = pd.DataFrame(data)[0].str.split(',', expand=True)
-        df.columns = df.iloc[0]
-        df = df[1:]
-        df.columns = df.columns.str.strip()
+        df = pd.read_csv(data)
+        #df = pd.DataFrame(data)[0].str.split(',', expand=True)
+        #df.columns = df.iloc[0]
+        #df = df[1:]
+        #df.columns = df.columns.str.strip()
         return df
     if response.status_code != 200:
         st.error(f"Ошибка при запросе API: {response.status_code}")
@@ -96,6 +97,7 @@ def new_model(data):
                 data: UploadedFile из streamlit
     """
     st.header("Создание модели")
+    m_type = st.text_input('Задайте тип модели (linear,boosting,bagging,random_forest):')
     id_fit = st.text_input('Задайте id для модели:')
     raw_params = st.text_input('Задайте гиперпараметры для модели через '
                                'запятую в формате: '
@@ -105,10 +107,10 @@ def new_model(data):
     hyperparameters = params_processing(raw_params)
     if id_fit != "":
         st.subheader('Статус обучения')
-        json_params = {'model_id': id_fit, 'hyperparameters': hyperparameters}
+        json_params = {'model_id': id_fit, 'hyperparameters': hyperparameters, 'model_type':m_type}
         st.write(f"Полученные на вход параметры: {json_params}")
         files = {
-            'data': ('data_sample.csv', data, 'multipart/form-data')
+            'extra_data': ('data_final_2.csv', data, 'multipart/form-data')
         }
 
         response = requests.post(f"{API_URL}/fit?jsonfile="
@@ -148,28 +150,29 @@ def predict(id_pred):
     """
     st.header("Предсказание по полученной модели")
     if st.checkbox("Получить предсказание"):
-        json_params_pred = {"model_id": str(id_pred)}
-        uploaded_pred = st.file_uploader("Загрузите данные в формате "
-                                         "CSV-файла, для которых нужно "
-                                         "получить предсказание:",
-                                         type=["csv"], key=4)
-        if uploaded_pred is not None:
-            files_pred = {
-                'data': ('data_sample.csv', uploaded_pred,
-                         'multipart/form-data')
-            }
-            response = requests.post(f"{API_URL}/predict?jsonfile="
-                                     f"{json.dumps(json_params_pred)}",
-                                     files=files_pred,
+        team = st.text_input('Введите имя домашней команды:')
+        opp = st.text_input('Введите имя оппонента:')
+        #uploaded_pred = st.file_uploader("Загрузите данные в формате "
+        #                                 "CSV-файла, для которых нужно "
+        #                                 "получить предсказание:",
+        #                                 type=["csv"], key=4)
+        if opp is not None:
+            #files_pred = {
+            #    'data': ('data_sample.csv', uploaded_pred,
+            #             'multipart/form-data')
+            #}
+            json_params_pred = {"model_id": str(id_pred), "home_team": str(team), "opponent_team": str(opp)}
+            response = requests.post(f"{API_URL}/predict",
+                                     json = json_params_pred,
                                      timeout=600)
-            content = StringIO(response.content.decode("utf-8"))
-            data = pd.read_csv(content).reset_index().drop(columns=['index'])
+            #content = StringIO(response.content.decode("utf-8"))
+            #data = pd.read_csv(content).reset_index().drop(columns=['index'])
             if response.status_code == 200:
-                st.write('Прогноз получен. Ниже приведен пример из первых строк.')
-                st.write('В переменной preds лежат предсказания: '
+                st.write('Прогноз получен. Ниже исход матча:')
+                st.write(
                          '1 - победа домашней команды, '
                          '0 - проигрыш или ничья')
-                st.write(data.head(10))
+                st.write(response.text)
             else:
                 st.write(response.text)
 
