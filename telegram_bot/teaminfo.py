@@ -3,19 +3,16 @@ import pandas as pd
 
 CSV_PATH = os.path.join(os.path.dirname(__file__), '../teams_matches_stats-2.csv')
 
-# Кэшируем DataFrame для ускорения
 _df = None
 
 def get_team_info(team_name: str):
     global _df
     if _df is None:
         _df = pd.read_csv(CSV_PATH)
-    # Поиск по названию команды (без учета регистра)
     team_rows = _df[_df['team'].str.lower() == team_name.lower()]
     if team_rows.empty:
         return None
     row = team_rows.iloc[0]
-    # Примерные поля, можно расширить по необходимости
     info = {
         'Команда': row['team'],
         'Страна': row.get('country', 'неизвестно'),
@@ -29,7 +26,6 @@ def get_top_teams(n=5):
     global _df
     if _df is None:
         _df = pd.read_csv(CSV_PATH)
-    # Проверяем, что нужное поле есть
     if 'mean_player_value' not in _df.columns:
         return []
     # Сортируем и берём топ-n
