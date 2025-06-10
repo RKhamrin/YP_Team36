@@ -156,7 +156,7 @@ def predict(id_pred):
         #                                 "CSV-файла, для которых нужно "
         #                                 "получить предсказание:",
         #                                 type=["csv"], key=4)
-        if opp is not None:
+        if opp != "":
             #files_pred = {
             #    'data': ('data_sample.csv', uploaded_pred,
             #             'multipart/form-data')
@@ -172,7 +172,7 @@ def predict(id_pred):
                 st.write(
                          '1 - победа домашней команды, '
                          '0 - проигрыш или ничья')
-                st.write(response.text)
+                st.write(f"Исход: {response.json()['score']}")
             else:
                 st.write(response.text)
 
