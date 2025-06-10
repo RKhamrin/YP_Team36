@@ -1,56 +1,25 @@
 import pandas as pd
 
-
 def getStats(team, date, df):
-    """Функция подсчета статистик для каждой команды
-    params:
-      team: str
-      date: str
-      df: pd.DataFrame
-
-    returns:
-      stats: List
-    """
-    if 'result' in df.columns:
-        df_filter = df[(df['team'] == team) & (df['date'] < date)]
-        if 0 < len(df_filter) < 10:
-            stats = df_filter.drop(['team', 'date', 'opponent', 'venue', 'result'], axis=1).sum()/len(df_filter)
-        elif len(df_filter) >= 10:
-            stats = df_filter.drop(['team', 'date', 'opponent', 'venue', 'result'], axis=1)[-10:].sum()/10
-        else:
-            df_filter = df[(df['team'] == team) & (df['date'] <= date)]
-            stats = df_filter.drop(['team', 'date', 'opponent', 'venue', 'result'], axis=1).sum()
-
+    srez = df[(df['team']== team)&(df['date'] < date)]
+    if 0 < len(srez) < 10:
+      stats = srez.drop(['team', 'date', 'opponent', 'venue', 'result'], axis = 1).sum()/len(srez)
+    elif len(srez) >= 10:
+      stats = srez.drop(['team', 'date', 'opponent', 'venue', 'result'], axis = 1)[-10:].sum()/10
     else:
-        df_filter = df[(df['team'] == team) & (df['date'] < date)]
-        if 0 < len(df_filter) < 10:
-            stats = df_filter.drop(['team', 'date', 'opponent', 'venue'], axis=1).sum()/len(df_filter)
-
-        elif len(df_filter) >= 10:
-            stats = df_filter.drop(['team', 'date', 'opponent', 'venue'], axis=1)[-10:].sum()/10
-
-        else:
-            df_filter = df[(df['team'] == team) & (df['date'] <= date)]
-            stats = df_filter.drop(['team', 'date', 'opponent', 'venue'], axis=1).sum()
-
+      srez = df[(df['team']== team)&(df['date'] <= date)]
+      stats = srez.drop(['team', 'date', 'opponent', 'venue', 'result'], axis = 1).sum()
     return stats.values.tolist()
 
 
 def GetTrain(data):
-    """Функция получения подготовленных данных
-    params:
-      data: pd.DataFrame
-
-    returns:
-      features: List
-    """
-    features = []
-    for i in range(len(data)):
-        team1 = getStats(data['team'][i], data['date'][i], data)
-        team2 = getStats(data['opponent'][i], data['date'][i], data)
-        diff = [a - b for a, b in zip(team1, team2)]
-        features.append(diff)
-    return features
+  features = []
+  for i in range(len(data)):
+    team1 = getStats(data['team'][i], data['date'][i], data)
+    team2 = getStats(data['opponent'][i], data['date'][i], data)
+    diff = [a - b for a, b in zip(team1, team2)]
+    features.append(diff)
+  return features
 
 
 def GetPrediction(data, enc, scaler, model):
@@ -65,7 +34,7 @@ def GetPrediction(data, enc, scaler, model):
       preds: np.array
     """
     feat_data = GetTrain(data)
-    x = pd.DataFrame(feat_data, columns=data.drop(['team', 'date', 'opponent', 'venue'], axis=1).columns)
+    x = pd.DataFrame(feat_data, columns=data.drop(['team', 'date', 'opponent', 'venue', 'result'], axis=1).columns)
     x = pd.concat([x, data['venue']], axis=1)
 
     for_enc = x[['venue']]
